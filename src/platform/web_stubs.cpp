@@ -9,9 +9,6 @@
 #include <emscripten.h>
 #endif
 
-// libass stub implementations
-// TODO: Replace with actual libass WASM build for subtitle support
-
 extern "C" {
 
 #include <stddef.h>
