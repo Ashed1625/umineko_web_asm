@@ -37,6 +37,8 @@ services:
 
 Replace `/path/to/your/umineko/game` with the path to your game directory containing `0.txt`, `nscript.dat`, or whichever script format your version uses, along with the arc/nsa/sar archives.
 
+A `manifest.json` is generated at build time listing all game files. On startup, the browser creates 0-byte stubs for each file and fetches them on demand over HTTP when the engine reads them.
+
 ## Project Structure
 
 ```
@@ -44,31 +46,32 @@ umineko web/
 ├── CMakeLists.txt          # Emscripten build configuration
 ├── Dockerfile              # Multi-stage build (emscripten → nginx)
 ├── docker-compose.yml
+├── nginx.conf              # nginx config with CORS and caching headers
 ├── src/
 │   ├── Resources.cpp       # Embedded GLSL shaders (generated)
 │   ├── platform/
-│   │   └── web_stubs.cpp   # Stub implementations for libass
+│   │   └── web_stubs.cpp   # Stub implementations for libass, smpeg2, FFmpeg
 │   └── stubs/
 │       ├── ass/ass.h       # libass stub header
 │       └── smpeg2/smpeg.h  # smpeg2 stub header
 └── web/
-    └── index.html          # HTML shell with <canvas>
+    └── index.html          # HTML shell with canvas, manifest loader, IDBFS setup
 ```
 
 The actual engine source (~55 C++ files) comes from the [forked ONScripter-RU repo](https://github.com/VictoriqueMoe/onscripter-ru), which is cloned during the Docker build.
 
 ## Current Status
 
-This is an early-stage port. What works:
-
-- Full engine compiles to WebAssembly
-- SDL2_gpu GLES2 backend (maps to WebGL)
-- FFmpeg 3.3.9 for media decoding
-- ASYNCIFY for cooperative multitasking
+What works:
+- Full engine compiles to WebAssembly with ASYNCIFY
+- SDL2_gpu GLES2 backend rendering via WebGL
+- Game script execution, text rendering, image display
+- Settings menu (interactive, buttons respond to clicks)
+- Lazy asset loading over HTTP (101k+ files loaded on demand via manifest.json)
+- Persistent storage via IDBFS (settings and saves stored in browser IndexedDB)
+- Keyboard and mouse input via SDL2 events
 
 What doesn't work yet:
-
-- Game asset loading over HTTP (needs lazy-loading implementation)
-- Subtitle rendering (libass is stubbed)
-- Save file persistence (needs IDBFS integration)
+- Audio playback (SDL2_mixer initializes but untested in-game)
 - Video playback (FFmpeg is linked but untested in browser)
+- Touch input for mobile browsers

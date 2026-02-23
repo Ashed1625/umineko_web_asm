@@ -1,16 +1,16 @@
 # TODO
 
 ## Asset Loading
-- [ ] Lazy-load backgrounds, sprites, sound, and video over HTTP on demand instead of preloading everything
-- [ ] Load archive files (arc.nsa, etc.) — either fetch whole archives or intercept file reads and fetch individual assets
+- [x] Lazy-load backgrounds, sprites, sound, and video over HTTP on demand instead of preloading everything
+- [x] Load archive files (arc.nsa, etc.) — manifest.json + 0-byte stubs + EM_ASYNC_JS fetch on first read
 - [ ] Add loading/progress indicator when assets are being fetched during gameplay
 
 ## Save System
-- [ ] Integrate Emscripten IDBFS for persistent save file storage in the browser
-- [ ] Sync saves to IndexedDB so progress survives page reloads
+- [x] Integrate Emscripten IDBFS for persistent save file storage in the browser
+- [x] Sync saves to IndexedDB so progress survives page reloads (operate_config save, game saves, relaunch)
 
 ## Subtitle Rendering
-- [ ] Build libass (+ harfbuzz, fribidi) with Emscripten and replace the current stubs in web_stubs.cpp
+- [x] Build libass (+ harfbuzz, fribidi) with Emscripten and replace the current stubs in web_stubs.cpp
 - [ ] Only affects video cutscene subtitles, not core gameplay
 
 ## Video Playback
@@ -22,7 +22,7 @@
 - [ ] Verify BGM, sound effects, and voice lines all work
 
 ## Input
-- [ ] Test keyboard and mouse input through SDL2 events
+- [x] Test keyboard and mouse input through SDL2 events
 - [ ] Consider touch input support for mobile browsers
 
 ## Performance
