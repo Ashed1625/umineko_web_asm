@@ -76,6 +76,8 @@ COPY --from=0 /build/umineko-web/build/umineko-web.wasm /usr/share/nginx/html/um
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY scripts/generate-manifest.sh /usr/local/bin/generate-manifest.sh
 COPY scripts/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN sed -i 's/\r$//' /usr/local/bin/entrypoint.sh /usr/local/bin/generate-manifest.sh \
+    && chmod +x /usr/local/bin/entrypoint.sh /usr/local/bin/generate-manifest.sh
 
 EXPOSE 80
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
