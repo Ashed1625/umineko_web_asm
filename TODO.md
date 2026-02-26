@@ -17,7 +17,8 @@
 ## Video Playback
 - [x] FFmpeg-based video decoding works in browser (synchronous frame pumping replaces async threads)
 - [x] Frame queue capped at 6 to prevent OOM (1080p RGB24 ~6MB/frame, WASM 2GB limit)
-- [ ] Add mpeg2video decoder to Dockerfile FFmpeg build for .m2v overlay videos
+- [x] MPEG-2 overlay videos (.m2v) with alpha masking render correctly
+- [x] Fix: `commitVisualState()` before `waitvideo` loop to resolve dirty rect / frame advancement issues
 
 ## Audio
 - [x] Test OGG/Vorbis audio playback through SDL2 audio in the browser

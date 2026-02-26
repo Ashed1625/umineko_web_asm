@@ -50,7 +50,7 @@ umineko web/
 ├── src/
 │   ├── Resources.cpp       # Embedded GLSL shaders (generated)
 │   ├── platform/
-│   │   └── web_stubs.cpp   # Stub implementations for libass, smpeg2, FFmpeg
+│   │   └── web_stubs.cpp   # Stub implementations for smpeg2, libusb, etc.
 │   └── stubs/
 │       ├── ass/ass.h       # libass stub header
 │       └── smpeg2/smpeg.h  # smpeg2 stub header
@@ -72,6 +72,7 @@ What works:
 - Keyboard and mouse input via SDL2 events
 - Audio playback (BGM, sound effects, voice via SDL2_mixer and Web Audio API)
 - Video playback (cutscenes via FFmpeg synchronous decoding in WASM)
+- MPEG-2 overlay videos (.m2v) with alpha mask compositing
 
 What doesn't work yet:
 - Video subtitles (libass is stubbed; subtitle streams are skipped)
