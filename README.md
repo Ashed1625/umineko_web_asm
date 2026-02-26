@@ -70,8 +70,9 @@ What works:
 - Lazy asset loading over HTTP (101k+ files loaded on demand via manifest.json)
 - Persistent storage via IDBFS (settings and saves stored in browser IndexedDB)
 - Keyboard and mouse input via SDL2 events
+- Audio playback (BGM, sound effects, voice via SDL2_mixer and Web Audio API)
+- Video playback (cutscenes via FFmpeg synchronous decoding in WASM)
 
 What doesn't work yet:
-- Audio playback (SDL2_mixer initializes but untested in-game)
-- Video playback (FFmpeg is linked but untested in browser)
+- Video subtitles (libass is stubbed; subtitle streams are skipped)
 - Touch input for mobile browsers

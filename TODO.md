@@ -11,15 +11,17 @@
 
 ## Subtitle Rendering
 - [x] Build libass (+ harfbuzz, fribidi) with Emscripten and replace the current stubs in web_stubs.cpp
+- [ ] Re-enable subtitle processing in pumpSynchronous() once libass stubs are replaced with real implementation
 - [ ] Only affects video cutscene subtitles, not core gameplay
 
 ## Video Playback
-- [ ] Test FFmpeg-based video decoding in browser (linked but untested)
-- [ ] May need to fall back to browser-native video APIs if performance is too poor
+- [x] FFmpeg-based video decoding works in browser (synchronous frame pumping replaces async threads)
+- [x] Frame queue capped at 6 to prevent OOM (1080p RGB24 ~6MB/frame, WASM 2GB limit)
+- [ ] Add mpeg2video decoder to Dockerfile FFmpeg build for .m2v overlay videos
 
 ## Audio
-- [ ] Test OGG/Vorbis audio playback through SDL2 audio in the browser
-- [ ] Verify BGM, sound effects, and voice lines all work
+- [x] Test OGG/Vorbis audio playback through SDL2 audio in the browser
+- [x] Verify BGM, sound effects, and voice lines all work
 
 ## Input
 - [x] Test keyboard and mouse input through SDL2 events
@@ -28,6 +30,7 @@
 ## Performance
 - [ ] Profile WASM execution and rendering performance
 - [ ] Consider building with -O3 or -Oz for smaller/faster output
+- [ ] Remove `-g` debug flag once stable (currently enabled for stack traces)
 - [ ] Investigate SharedArrayBuffer + pthreads for multithreading (requires COOP/COEP headers from caddy)
 
 ## Docker / Build

@@ -43,9 +43,9 @@ RUN cd deps && \
         --disable-network --disable-everything \
         --enable-avcodec --enable-avformat --enable-avutil \
         --enable-swscale --enable-swresample \
-        --enable-decoder=h264,vp9,vp8,aac,opus,vorbis,ass,ssa,mp3,pcm_s16le \
-        --enable-demuxer=matroska,mov,mp4,ogg,ass,ssa,avi,wav,mp3 \
-        --enable-parser=h264,vp9,aac,opus,vorbis,mpegaudio \
+        --enable-decoder=h264,vp9,vp8,mpeg2video,aac,opus,vorbis,ass,ssa,mp3,pcm_s16le \
+        --enable-demuxer=matroska,mov,mp4,mpegvideo,ogg,ass,ssa,avi,wav,mp3 \
+        --enable-parser=h264,vp9,mpegvideo,aac,opus,vorbis,mpegaudio \
         --enable-protocol=file \
         --disable-pthreads --enable-small \
         --extra-cflags="-O2" --extra-ldflags="-O2" && \
