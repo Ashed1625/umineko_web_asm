@@ -13,12 +13,12 @@
             align-items: center;
             height: 100vh;
             overflow: hidden;
+            touch-action: none;
         }
         #canvas {
             display: block;
-            max-width: 100vw;
-            max-height: 100vh;
             pointer-events: none;
+            touch-action: none;
         }
         #loading {
             position: absolute;
@@ -28,11 +28,46 @@
             text-align: center;
         }
         #loading.hidden { display: none; }
+        #touch-controls {
+            display: none;
+            position: fixed;
+            bottom: 16px;
+            right: 16px;
+            z-index: 999;
+            gap: 12px;
+        }
+        #touch-controls button {
+            width: 48px;
+            height: 48px;
+            border: none;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            color: #fff;
+            font-size: 22px;
+            line-height: 48px;
+            text-align: center;
+            pointer-events: auto;
+            user-select: none;
+            -webkit-touch-callout: none;
+            -webkit-tap-highlight-color: transparent;
+            cursor: pointer;
+            backdrop-filter: blur(4px);
+        }
+        #touch-controls button:active {
+            background: rgba(255, 255, 255, 0.35);
+        }
+        @media (pointer: coarse) {
+            #touch-controls { display: flex; }
+        }
     </style>
 </head>
 <body>
     <div id="loading">Loading...</div>
     <canvas id="canvas" oncontextmenu="event.preventDefault()" tabindex="-1"></canvas>
+    <div id="touch-controls">
+        <button id="btn-menu" aria-label="Menu">&#9776;</button>
+        <button id="btn-fullscreen" aria-label="Fullscreen">&#x26F6;</button>
+    </div>
 
     <script>
         const EAGER_PATTERNS = [
@@ -134,7 +169,7 @@
         }
 
         (function() {
-            var origGetContext = HTMLCanvasElement.prototype.getContext;
+            const origGetContext = HTMLCanvasElement.prototype.getContext;
             HTMLCanvasElement.prototype.getContext = function(type, attrs) {
                 if (type === 'webgl' || type === 'webgl2') {
                     attrs = attrs || {};
@@ -144,7 +179,7 @@
             };
         })();
 
-        var idbfsSyncing = false;
+        let idbfsSyncing = false;
         function syncIDBFS() {
             if (idbfsSyncing) {
                 return;
@@ -184,15 +219,15 @@
                         console.warn('IDBFS initial sync error:', err);
                     }
                     try {
-                        var entries = FS.readdir('/home/web_user/.onscripter');
-                        for (var i = 0; i < entries.length; i++) {
+                        const entries = FS.readdir('/home/web_user/.onscripter');
+                        for (let i = 0; i < entries.length; i++) {
                             if (entries[i] === '.' || entries[i] === '..') {
                                 continue;
                             }
-                            var subdir = '/home/web_user/.onscripter/' + entries[i];
-                            var cfgPath = subdir + '/ons.cfg';
+                            const subdir = '/home/web_user/.onscripter/' + entries[i];
+                            const cfgPath = subdir + '/ons.cfg';
                             try {
-                                var data = FS.readFile(cfgPath);
+                                const data = FS.readFile(cfgPath);
                                 FS.writeFile('/game/ons.cfg', data);
                             } catch (e) {}
                         }
@@ -203,7 +238,126 @@
             }],
             onRuntimeInitialized: function() {
                 document.getElementById('loading').classList.add('hidden');
-                document.getElementById('canvas').style.pointerEvents = 'auto';
+                const canvas = document.getElementById('canvas');
+                canvas.style.pointerEvents = 'auto';
+
+                function fitCanvas() {
+                    if (document.fullscreenElement) {
+                        return;
+                    }
+                    const aspect = canvas.width / canvas.height;
+                    const vpW = window.innerWidth;
+                    const vpH = window.innerHeight;
+                    let w, h;
+                    if (vpW / vpH > aspect) {
+                        h = vpH;
+                        w = Math.round(vpH * aspect);
+                    } else {
+                        w = vpW;
+                        h = Math.round(vpW / aspect);
+                    }
+                    canvas.style.width = w + 'px';
+                    canvas.style.height = h + 'px';
+                }
+
+                fitCanvas();
+                window.addEventListener('resize', fitCanvas);
+                document.addEventListener('fullscreenchange', function() {
+                    if (!document.fullscreenElement) {
+                        setTimeout(fitCanvas, 100);
+                    }
+                });
+
+                let lastTapTime = 0;
+                let lastTapX = 0;
+                let lastTapY = 0;
+                let tapTimeout = null;
+                const TAP_DELAY = 250;
+                const TAP_DISTANCE = 30;
+
+                function toCanvasPixel(clientX, clientY) {
+                    const rect = canvas.getBoundingClientRect();
+                    const scaleX = canvas.width / rect.width;
+                    const scaleY = canvas.height / rect.height;
+                    return [
+                        Math.round((clientX - rect.left) * scaleX),
+                        Math.round((clientY - rect.top) * scaleY)
+                    ];
+                }
+
+                function sendClick(clientX, clientY, button) {
+                    const coords = toCanvasPixel(clientX, clientY);
+                    Module.ccall('ons_mouse_event', null, ['number','number','number','number'], [0, coords[0], coords[1], button]);
+                    Module.ccall('ons_mouse_event', null, ['number','number','number','number'], [1, coords[0], coords[1], button]);
+                }
+
+                canvas.addEventListener('touchstart', function(e) {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    if (e.touches.length === 1) {
+                        const touch = e.touches[0];
+                        const now = Date.now();
+                        const dx = touch.clientX - lastTapX;
+                        const dy = touch.clientY - lastTapY;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+
+                        if (now - lastTapTime < TAP_DELAY && dist < TAP_DISTANCE) {
+                            if (tapTimeout) {
+                                clearTimeout(tapTimeout);
+                                tapTimeout = null;
+                            }
+                            sendClick(touch.clientX, touch.clientY, 2);
+                            lastTapTime = 0;
+                        } else {
+                            lastTapTime = now;
+                            lastTapX = touch.clientX;
+                            lastTapY = touch.clientY;
+                            const tx = touch.clientX;
+                            const ty = touch.clientY;
+                            if (tapTimeout) {
+                                clearTimeout(tapTimeout);
+                            }
+                            tapTimeout = setTimeout(function() {
+                                sendClick(tx, ty, 0);
+                                tapTimeout = null;
+                            }, TAP_DELAY);
+                        }
+                    }
+                }, { passive: false, capture: true });
+
+                canvas.addEventListener('touchmove', function(e) {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    if (e.touches.length === 1) {
+                        const touch = e.touches[0];
+                        const coords = toCanvasPixel(touch.clientX, touch.clientY);
+                        Module.ccall('ons_mouse_event', null, ['number','number','number','number'], [2, coords[0], coords[1], 0]);
+                    }
+                }, { passive: false, capture: true });
+
+                canvas.addEventListener('touchend', function(e) {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                }, { passive: false, capture: true });
+
+                document.getElementById('btn-fullscreen').addEventListener('touchstart', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    Module.ccall('ons_toggle_fullscreen');
+                }, { passive: false, capture: true });
+                document.getElementById('btn-menu').addEventListener('touchstart', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    sendClick(canvas.width / 2, canvas.height / 2, 2);
+                }, { passive: false, capture: true });
+                document.getElementById('btn-fullscreen').addEventListener('click', function(e) {
+                    e.preventDefault();
+                    Module.ccall('ons_toggle_fullscreen');
+                });
+                document.getElementById('btn-menu').addEventListener('click', function(e) {
+                    e.preventDefault();
+                    sendClick(canvas.width / 2, canvas.height / 2, 2);
+                });
             }
         };
     </script>
