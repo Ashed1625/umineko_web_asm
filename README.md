@@ -67,6 +67,12 @@ docker compose up --build
 
 Open `http://localhost:8080` in your browser.
 
+> **Note:** On first launch, the container converts game assets (PNG → WebP, MP4 → WebM, OGG re-encoding) in the background. This can take a long time depending on your hardware. The game is playable immediately, but you won't see the full size savings until conversion finishes. Check progress with:
+>
+> ```bash
+> docker compose logs -f
+> ```
+
 ### Game Assets
 
 The engine expects game files at `game/` in the project root (mounted into the container at `/usr/share/nginx/html/game/`). Your game directory should contain:
@@ -386,3 +392,8 @@ The [forked ONScripter-RU engine](https://github.com/VictoriqueMoe/onscripter-ru
 | `Engine/Core/ONScripter.cpp` | Startup path adjustments for browser environment |
 | `Engine/Graphics/GPU.cpp` | WebGL-compatible GPU initialisation |
 | `Engine/Graphics/GLES2.cpp` | GLES2 shader compatibility |
+
+## Known Issues
+
+- **Do not change resolution on mobile** - Changing the "Window size" in the Config menu will break the display on mobile/tablet browsers. Leave it at the default setting. On desktop browsers, you can set it to your display's resolution for sharper rendering.
+- **Fullscreen cursor misalignment** - In fullscreen mode, the mouse cursor may be offset by a few pixels from menu items. This is a DPR/CSS scaling rounding issue with Emscripten's fullscreen API.

@@ -17,7 +17,6 @@
         }
         #canvas {
             display: block;
-            pointer-events: none;
             touch-action: none;
         }
         #loading {
@@ -56,12 +55,44 @@
         #touch-controls button:active {
             background: rgba(255, 255, 255, 0.35);
         }
+        #mobile-notice {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.85);
+            color: #eee;
+            font-family: sans-serif;
+            font-size: 13px;
+            text-align: center;
+            padding: 8px 36px 8px 12px;
+            z-index: 998;
+        }
+        #mobile-notice button {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #aaa;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 4px;
+            line-height: 1;
+        }
         @media (pointer: coarse) {
             #touch-controls { display: flex; }
+            #mobile-notice { display: block; }
         }
     </style>
 </head>
 <body>
+    <div id="mobile-notice">
+        Do not change the resolution in Config — it will break the display on mobile.
+        <button onclick="this.parentElement.style.display='none'" aria-label="Dismiss">&times;</button>
+    </div>
     <div id="loading">Loading...</div>
     <canvas id="canvas" oncontextmenu="event.preventDefault()" tabindex="-1"></canvas>
     <div id="touch-controls">
@@ -239,7 +270,6 @@
             onRuntimeInitialized: function() {
                 document.getElementById('loading').classList.add('hidden');
                 const canvas = document.getElementById('canvas');
-                canvas.style.pointerEvents = 'auto';
 
                 function fitCanvas() {
                     if (document.fullscreenElement) {
@@ -268,27 +298,17 @@
                     }
                 });
 
-                let lastTapTime = 0;
-                let lastTapX = 0;
-                let lastTapY = 0;
-                let tapTimeout = null;
-                const TAP_DELAY = 250;
-                const TAP_DISTANCE = 30;
-
-                function toCanvasPixel(clientX, clientY) {
+                function toNormalizedCoords(clientX, clientY) {
                     const rect = canvas.getBoundingClientRect();
-                    const scaleX = canvas.width / rect.width;
-                    const scaleY = canvas.height / rect.height;
                     return [
-                        Math.round((clientX - rect.left) * scaleX),
-                        Math.round((clientY - rect.top) * scaleY)
+                        (clientX - rect.left) / rect.width,
+                        (clientY - rect.top) / rect.height
                     ];
                 }
 
-                function sendClick(clientX, clientY, button) {
-                    const coords = toCanvasPixel(clientX, clientY);
-                    Module.ccall('ons_mouse_event', null, ['number','number','number','number'], [0, coords[0], coords[1], button]);
-                    Module.ccall('ons_mouse_event', null, ['number','number','number','number'], [1, coords[0], coords[1], button]);
+                function sendMouseEvent(type, x, y, button) {
+                    Module.ccall('ons_mouse_event', null,
+                        ['number','number','number','number'], [type, x, y, button]);
                 }
 
                 canvas.addEventListener('touchstart', function(e) {
@@ -296,32 +316,19 @@
                     e.stopImmediatePropagation();
                     if (e.touches.length === 1) {
                         const touch = e.touches[0];
-                        const now = Date.now();
-                        const dx = touch.clientX - lastTapX;
-                        const dy = touch.clientY - lastTapY;
-                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        const coords = toNormalizedCoords(touch.clientX, touch.clientY);
+                        sendMouseEvent(2, coords[0], coords[1], 0);
+                        sendMouseEvent(0, coords[0], coords[1], 0);
+                    }
+                }, { passive: false, capture: true });
 
-                        if (now - lastTapTime < TAP_DELAY && dist < TAP_DISTANCE) {
-                            if (tapTimeout) {
-                                clearTimeout(tapTimeout);
-                                tapTimeout = null;
-                            }
-                            sendClick(touch.clientX, touch.clientY, 2);
-                            lastTapTime = 0;
-                        } else {
-                            lastTapTime = now;
-                            lastTapX = touch.clientX;
-                            lastTapY = touch.clientY;
-                            const tx = touch.clientX;
-                            const ty = touch.clientY;
-                            if (tapTimeout) {
-                                clearTimeout(tapTimeout);
-                            }
-                            tapTimeout = setTimeout(function() {
-                                sendClick(tx, ty, 0);
-                                tapTimeout = null;
-                            }, TAP_DELAY);
-                        }
+                canvas.addEventListener('touchend', function(e) {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    if (e.changedTouches.length === 1) {
+                        const touch = e.changedTouches[0];
+                        const coords = toNormalizedCoords(touch.clientX, touch.clientY);
+                        sendMouseEvent(1, coords[0], coords[1], 0);
                     }
                 }, { passive: false, capture: true });
 
@@ -330,34 +337,30 @@
                     e.stopImmediatePropagation();
                     if (e.touches.length === 1) {
                         const touch = e.touches[0];
-                        const coords = toCanvasPixel(touch.clientX, touch.clientY);
-                        Module.ccall('ons_mouse_event', null, ['number','number','number','number'], [2, coords[0], coords[1], 0]);
+                        const coords = toNormalizedCoords(touch.clientX, touch.clientY);
+                        sendMouseEvent(2, coords[0], coords[1], 0);
                     }
                 }, { passive: false, capture: true });
 
-                canvas.addEventListener('touchend', function(e) {
-                    e.preventDefault();
-                    e.stopImmediatePropagation();
-                }, { passive: false, capture: true });
+                const btnFullscreen = document.getElementById('btn-fullscreen');
+                const btnMenu = document.getElementById('btn-menu');
 
-                document.getElementById('btn-fullscreen').addEventListener('touchstart', function(e) {
+                function handleFullscreen(e) {
                     e.preventDefault();
                     e.stopPropagation();
                     Module.ccall('ons_toggle_fullscreen');
-                }, { passive: false, capture: true });
-                document.getElementById('btn-menu').addEventListener('touchstart', function(e) {
+                }
+                function handleMenu(e) {
                     e.preventDefault();
                     e.stopPropagation();
-                    sendClick(canvas.width / 2, canvas.height / 2, 2);
-                }, { passive: false, capture: true });
-                document.getElementById('btn-fullscreen').addEventListener('click', function(e) {
-                    e.preventDefault();
-                    Module.ccall('ons_toggle_fullscreen');
-                });
-                document.getElementById('btn-menu').addEventListener('click', function(e) {
-                    e.preventDefault();
-                    sendClick(canvas.width / 2, canvas.height / 2, 2);
-                });
+                    sendMouseEvent(0, 0.5, 0.5, 2);
+                    sendMouseEvent(1, 0.5, 0.5, 2);
+                }
+
+                btnFullscreen.addEventListener('touchstart', handleFullscreen, { passive: false });
+                btnFullscreen.addEventListener('click', handleFullscreen);
+                btnMenu.addEventListener('touchstart', handleMenu, { passive: false });
+                btnMenu.addEventListener('click', handleMenu);
             }
         };
     </script>
